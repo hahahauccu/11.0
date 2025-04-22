@@ -27,8 +27,8 @@ function shufflePoseOrder() {
 
 // 載入 png / PNG
 function resolvePoseImageName(base) {
-  const png = poses/${base}.png;
-  const PNG = poses/${base}.PNG;
+  const png = `poses/${base}.png`;
+  const PNG = `poses/${base}.PNG`;
   return new Promise(resolve => {
     const img = new Image();
     img.onload = () => resolve(png);
@@ -41,13 +41,13 @@ function resolvePoseImageName(base) {
 async function loadStandardKeypoints() {
   standardKeypointsList = [];
   for (const i of poseOrder) {
-    const res = await fetch(poses/pose${i}.json);
+    const res = await fetch(`poses/pose${i}.json`);
     const json = await res.json();
     const keypoints = json.keypoints || json;
     standardKeypointsList.push({
       id: i,
       keypoints,
-      imagePath: await resolvePoseImageName(pose${i})
+      imagePath: await resolvePoseImageName(`pose${i}`)
     });
   }
 }
