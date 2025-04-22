@@ -12,8 +12,8 @@ let standardKeypointsList = [];
 let poseOrder = [];
 let successFrames = 0;
 let failFrames = 0;
-const REQUIRED_FRAMES = 60;
-const MAX_FAIL_FRAMES = 15;
+const REQUIRED_FRAMES = 30;
+const MAX_FAIL_FRAMES = 5;
 let isPlaying = false;
 
 // 隨機順序
@@ -121,7 +121,7 @@ async function detect() {
     drawKeypoints(user, 'red', 6, 1.0);
 
     const avgDiff = compareKeypointsAngleBased(user, currentPose.keypoints);
-    if (avgDiff < 10) {
+    if (avgDiff < 20) {
       successFrames++;
     } else {
       failFrames++;
