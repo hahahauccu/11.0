@@ -121,7 +121,7 @@ async function detect() {
     drawKeypoints(user, 'red', 6, 1.0);
 
     const avgDiff = compareKeypointsAngleBased(user, currentPose.keypoints);
-    if (avgDiff < 5) {
+    if (avgDiff < 10) {
       successFrames++;
     } else {
       failFrames++;
