@@ -4,7 +4,6 @@ const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('startBtn');
 const restartBtn = document.getElementById('restartBtn');
 const poseImage = document.getElementById('poseImage');
-const finishMessage = document.getElementById('finishMessage');
 
 let detector, rafId;
 let currentPoseIndex = 0;
@@ -17,31 +16,19 @@ const REQUIRED_FRAMES = 50;
 const MAX_FAIL_FRAMES = 10;
 let isPlaying = false;
 
-// 避免 pose5 和 pose7 連在一起
+// 隨機順序
 function shufflePoseOrder() {
-  const poses = [1, 2, 3, 4, 5, 6, 7];
-  let valid = false;
-
-  while (!valid) {
-    for (let i = poses.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [poses[i], poses[j]] = [poses[j], poses[i]];
-    }
-    valid = true;
-    for (let i = 0; i < poses.length - 1; i++) {
-      if ((poses[i] === 5 && poses[i + 1] === 7) || (poses[i] === 7 && poses[i + 1] === 5)) {
-        valid = false;
-        break;
-      }
-    }
+  poseOrder = Array.from({ length: totalPoses }, (_, i) => i + 1);
+  for (let i = poseOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [poseOrder[i], poseOrder[j]] = [poseOrder[j], poseOrder[i]];
   }
-
-  poseOrder = poses;
 }
 
+// 載入 png / PNG
 function resolvePoseImageName(base) {
-  const png = `poses/${base}.png`;
-  const PNG = `poses/${base}.PNG`;
+  const png = poses/${base}.png;
+  const PNG = poses/${base}.PNG;
   return new Promise(resolve => {
     const img = new Image();
     img.onload = () => resolve(png);
@@ -50,20 +37,22 @@ function resolvePoseImageName(base) {
   });
 }
 
+// 載入姿勢資料
 async function loadStandardKeypoints() {
   standardKeypointsList = [];
   for (const i of poseOrder) {
-    const res = await fetch(`poses/pose${i}.json`);
+    const res = await fetch(poses/pose${i}.json);
     const json = await res.json();
     const keypoints = json.keypoints || json;
     standardKeypointsList.push({
       id: i,
       keypoints,
-      imagePath: await resolvePoseImageName(`pose${i}`)
+      imagePath: await resolvePoseImageName(pose${i})
     });
   }
 }
 
+// 計算角度
 function computeAngle(a, b, c) {
   const ab = { x: b.x - a.x, y: b.y - a.y };
   const cb = { x: b.x - c.x, y: b.y - c.y };
@@ -74,6 +63,7 @@ function computeAngle(a, b, c) {
   return angleRad * (180 / Math.PI);
 }
 
+// 角度比對
 function compareKeypointsAngleBased(user, standard) {
   const angles = [
     ["left_shoulder", "left_elbow", "left_wrist"],
@@ -103,6 +93,7 @@ function compareKeypointsAngleBased(user, standard) {
   return totalDiff / count;
 }
 
+// 畫骨架
 function drawKeypoints(kps, color, radius, alpha) {
   ctx.globalAlpha = alpha;
   ctx.fillStyle = color;
@@ -116,6 +107,7 @@ function drawKeypoints(kps, color, radius, alpha) {
   ctx.globalAlpha = 1.0;
 }
 
+// 偵測流程
 async function detect() {
   const result = await detector.estimatePoses(video);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -143,9 +135,9 @@ async function detect() {
         poseImage.src = standardKeypointsList[currentPoseIndex].imagePath;
       } else {
         cancelAnimationFrame(rafId);
-        poseImage.style.display = 'none';
-        finishMessage.style.display = "block";
+        poseImage.src = "";
         restartBtn.style.display = "block";
+        return;
       }
     } else if (failFrames > MAX_FAIL_FRAMES) {
       successFrames = 0;
@@ -156,16 +148,14 @@ async function detect() {
   rafId = requestAnimationFrame(detect);
 }
 
+// 啟動
 async function startGame() {
   cancelAnimationFrame(rafId);
-  poseImage.style.display = 'block';
   poseImage.src = "";
-  finishMessage.style.display = "none";
-  restartBtn.style.display = "none";
   standardKeypointsList = [];
   currentPoseIndex = 0;
-  successFrames = 0;
-  failFrames = 0;
+  startBtn.style.display = 'none';
+  restartBtn.style.display = 'none';
   isPlaying = true;
 
   try {
@@ -180,7 +170,7 @@ async function startGame() {
     video.srcObject = stream;
     await video.play();
   } catch (err) {
-    alert("⚠️ 無法開啟攝影機：" + err.message);
+    alert("⚠️ 鏡頭錯誤：" + err.message);
     return;
   }
 
@@ -215,9 +205,7 @@ document.body.addEventListener('click', () => {
     poseImage.src = standardKeypointsList[currentPoseIndex].imagePath;
   } else {
     cancelAnimationFrame(rafId);
-    poseImage.style.display = 'none';
-    finishMessage.style.display = "block";
+    poseImage.src = "";
     restartBtn.style.display = "block";
-    isPlaying = false;
   }
 });
