@@ -17,7 +17,8 @@
 
     canvas, video {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
@@ -50,7 +51,19 @@
       border: 3px solid white;
       border-radius: 12px;
       z-index: 5;
-      background: rgba(0, 0, 0, 0.2);
+      background: white; /* 純白底色 */
+    }
+
+    #finishMessage {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: lime;
+      font-size: 2em;
+      font-weight: bold;
+      z-index: 10;
+      display: none;
     }
   </style>
 
@@ -62,6 +75,7 @@
   <button id="startBtn">開始遊戲</button>
   <button id="restartBtn">重新開始</button>
   <img id="poseImage" src="" alt="Pose" />
+  <div id="finishMessage">🎉 全部完成！</div>
   <video id="video" autoplay playsinline muted></video>
   <canvas id="canvas"></canvas>
 
